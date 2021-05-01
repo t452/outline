@@ -175,6 +175,7 @@ export class Mailer {
         port: process.env.SMTP_PORT,
         secure: !!process.env.SMTP_TLS,
         auth: undefined,
+        name: process.env.SMTP_HOSTNAME,
       };
 
       if (process.env.SMTP_USERNAME) {
