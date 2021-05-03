@@ -25,15 +25,23 @@ type Props = {|
 function Login({ location }: Props) {
   const { auth } = useStores();
   const { config } = auth;
+  const [emailLinkSent, setEmailLinkSent] = React.useState(null);
   const [emailLinkSentTo, setEmailLinkSentTo] = React.useState("");
   const isCreate = location.pathname === "/create";
 
   const handleReset = React.useCallback(() => {
+    setEmailLinkSent(null);
     setEmailLinkSentTo("");
   }, []);
 
   const handleEmailSuccess = React.useCallback((email) => {
     setEmailLinkSentTo(email);
+    setEmailLinkSent(true);
+  }, []);
+
+  const handleEmailFailure = React.useCallback((email) => {
+    setEmailLinkSentTo(email);
+    setEmailLinkSent(false);
   }, []);
 
   React.useEffect(() => {
@@ -67,19 +75,27 @@ function Login({ location }: Props) {
       </Back>
     ));
 
-  if (emailLinkSentTo) {
+  if (emailLinkSent !== null) {
+    const title = emailLinkSent ? "Check your email" : "Email not found";
     return (
       <Background>
         {header}
         <Centered align="center" justify="center" column auto>
-          <PageTitle title="Check your email" />
+          <PageTitle title={title} />
           <CheckEmailIcon size={38} color="currentColor" />
 
-          <Heading centered>Check your email</Heading>
-          <Note>
-            A magic sign-in link has been sent to the email{" "}
-            <em>{emailLinkSentTo}</em>, no password needed.
-          </Note>
+          <Heading centered>{title}</Heading>
+          {emailLinkSent ? (
+            <Note>
+              A magic sign-in link has been sent to the email{" "}
+              <em>{emailLinkSentTo}</em>, no password needed.
+            </Note>
+          ) : (
+            <Note>
+              There is no account associated with this email address. Please ask
+              your team administrator for an invite.
+            </Note>
+          )}
           <br />
           <ButtonLarge onClick={handleReset} fullwidth neutral>
             Back to login
@@ -120,6 +136,7 @@ function Login({ location }: Props) {
             <Provider
               isCreate={isCreate}
               onEmailSuccess={handleEmailSuccess}
+              onEmailFailure={handleEmailFailure}
               {...defaultProvider}
             />
             {hasMultipleProviders && (
@@ -143,6 +160,7 @@ function Login({ location }: Props) {
               key={provider.id}
               isCreate={isCreate}
               onEmailSuccess={handleEmailSuccess}
+              onEmailFailure={handleEmailFailure}
               {...provider}
             />
           );

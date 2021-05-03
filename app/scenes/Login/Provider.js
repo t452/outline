@@ -13,6 +13,7 @@ type Props = {
   authUrl: string,
   isCreate: boolean,
   onEmailSuccess: (email: string) => void,
+  onEmailFailure: (email: string) => void,
 };
 
 type State = {
@@ -44,8 +45,10 @@ class Provider extends React.Component<Props, State> {
         });
         if (response.redirect) {
           window.location.href = response.redirect;
-        } else {
+        } else if (response.success) {
           this.props.onEmailSuccess(this.state.email);
+        } else {
+          this.props.onEmailFailure(this.state.email);
         }
       } finally {
         this.setState({ isSubmitting: false });
